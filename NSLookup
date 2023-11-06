@@ -19,8 +19,8 @@ Get-Content $inputFile | ForEach-Object {
     # Perform an NS lookup with the specified DNS server
     try {
         $dnsResult = Resolve-DnsName -Name $fqdn -Server $dnsServer
-        $ipAddresses = $dnsResult.IPAddress
-        $aliases = $dnsResult.QueryType
+        $ipAddresses = $dnsResult.QueryTypeData | Where-Object { $_.QueryType -eq "A" } | ForEach-Object { $_.IPAddress }
+        $aliases = $dnsResult.Aliases -join ", "
     } catch {
         # Handle exceptions, e.g., if the FQDN doesn't resolve
         $ipAddresses = "NA"
@@ -31,7 +31,7 @@ Get-Content $inputFile | ForEach-Object {
     $result = [PSCustomObject]@{
         FQDN = $fqdn
         IPs = ($ipAddresses -join ", ")
-        Aliases = ($aliases -join ", ")
+        Aliases = $aliases
     }
 
     # Add the result object to the results array
