@@ -19,10 +19,11 @@ Get-Content $inputFile | ForEach-Object {
     # Perform an NS lookup with the specified DNS server
     try {
         $dnsResult = Resolve-DnsName -Name $fqdn -Server $dnsServer
-        $ipAddresses = $dnsResult.IPAddress
-        $aliases = $dnsResult.QueryType
+        $ipAddresses = $dnsResult.IP4Address
+        $aliases = $dnsResult.NameHost
     } catch {
         # Handle exceptions, e.g., if the FQDN doesn't resolve
+        $dnsResult = "NA"
         $ipAddresses = "NA"
         $aliases = "NA"
     }
