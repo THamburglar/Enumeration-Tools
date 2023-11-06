@@ -1,6 +1,9 @@
 # Define the input file containing the list of FQDNs
 $inputFile = "FQDNs.txt"
 
+# Define the DNS server to be used
+$dnsServer = "dns.testing"
+
 # Define the output CSV file
 $outputFile = "DNSLookupResults.csv"
 
@@ -13,11 +16,11 @@ Get-Content $inputFile | ForEach-Object {
     $ipAddresses = @()
     $aliases = @()
 
-    # Perform an NS lookup to retrieve IP addresses and aliases
+    # Perform an NS lookup with the specified DNS server
     try {
-        $dnsResult = [System.Net.Dns]::GetHostEntry($fqdn)
-        $ipAddresses = $dnsResult.AddressList.IPAddressToString
-        $aliases = $dnsResult.Aliases -join ", "
+        $dnsResult = Resolve-DnsName -Name $fqdn -Server $dnsServer
+        $ipAddresses = $dnsResult.IPAddress
+        $aliases = $dnsResult.QueryType
     } catch {
         # Handle exceptions, e.g., if the FQDN doesn't resolve
         $ipAddresses = "NA"
@@ -27,8 +30,8 @@ Get-Content $inputFile | ForEach-Object {
     # Create a custom object to store the results for this FQDN
     $result = [PSCustomObject]@{
         FQDN = $fqdn
-        IPs = $ipAddresses
-        Aliases = $aliases
+        IPs = ($ipAddresses -join ", ")
+        Aliases = ($aliases -join ", ")
     }
 
     # Add the result object to the results array
